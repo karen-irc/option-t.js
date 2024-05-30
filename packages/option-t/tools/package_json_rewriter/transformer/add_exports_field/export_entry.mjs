@@ -9,10 +9,8 @@ class AbstractExportEntry {
     }
 }
 
-const EXTENSION_CJS = 'cjs';
 const EXTENSION_MJS = 'js';
 const EXTENSION_DMTS = 'd.ts';
-const EXTENSION_DCTS = 'd.cts';
 
 export class ExportEntry extends AbstractExportEntry {
     #key;
@@ -44,33 +42,22 @@ export class ExportEntry extends AbstractExportEntry {
         const p = this.#path !== null ? this.#path : this.#key;
 
         const esm = `./esm/${p}.${EXTENSION_MJS}`;
-        const cjs = `./cjs/${p}.${EXTENSION_CJS}`;
         const dmts = `./esm/${p}.${EXTENSION_DMTS}`;
-        const dcts = `./cjs/${p}.${EXTENSION_DCTS}`;
         const entry = constructDualPackagePathValue({
             esm,
-            cjs,
             dmts,
-            dcts,
         });
         return entry;
     }
 }
 
-function constructDualPackagePathValue({ cjs, esm, dmts, dcts }) {
-    assert.strictEqual(typeof cjs, 'string', 'cjs should be string');
+function constructDualPackagePathValue({ esm, dmts }) {
     assert.strictEqual(typeof esm, 'string', 'esm should be string');
     assert.strictEqual(typeof dmts, 'string', 'dmts should be string');
-    assert.strictEqual(typeof dcts, 'string', 'dcts should be string');
 
     const importCondition = constructPathValue({
         filepath: esm,
         dts: dmts,
-    });
-
-    const requireCondition = constructPathValue({
-        filepath: cjs,
-        dts: dcts,
     });
 
     // [By the document of Node.js v14.2](https://nodejs.org/api/esm.html#esm_resolution_algorithm),
@@ -84,7 +71,7 @@ function constructDualPackagePathValue({ cjs, esm, dmts, dcts }) {
         // For example, if we set `d.ts` for ES Module, tsc will think this entrypoint is ESM.
 
         import: importCondition,
-        require: requireCondition,
+
         // _default_ should be placed to the last.
         // https://nodejs.org/api/packages.html#conditional-exports
         default: importCondition,

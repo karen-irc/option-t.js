@@ -5,8 +5,6 @@ node_modules/
 __dist/
 __tmp_base/
 __tmp_mjs/
-__tmp_cjs/
-cjs/
 esm/
 lib/
 __snapshots__/

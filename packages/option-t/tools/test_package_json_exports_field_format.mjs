@@ -63,14 +63,11 @@ async function checkWhetherFileExist(parentDir, filename) {
 }
 
 const TestMode = Object.freeze({
-    CJS: 'commonjs',
     ESM: 'es_module',
 });
 
 const EXT_ES_MODULE = '.js';
-const EXT_COMMONJS = '.cjs';
 const EX_D_TS = '.d.ts';
-const EX_D_CTS = '.d.cts';
 
 async function testBasicConditionObject(mode, t, conditionValue) {
     await t.test('should be condition object', (_t) => {
@@ -95,14 +92,6 @@ async function testBasicConditionObject(mode, t, conditionValue) {
                 assert.ok(valueTypes.endsWith(EX_D_TS));
             });
             break;
-        case TestMode.CJS:
-            await t.test(`check 'default' file name style is ${EXT_COMMONJS}`, (_t) => {
-                assert.ok(valueDefault.endsWith(EXT_COMMONJS));
-            });
-            await t.test(`check 'types' file name style is ${EX_D_CTS}`, (_t) => {
-                assert.ok(valueTypes.endsWith(EX_D_CTS));
-            });
-            break;
         default:
             throw new RangeError(`unknown mode: ${mode}`);
     }
@@ -118,13 +107,9 @@ async function testComplexConditionObject(t, conditionValue) {
         await testBasicConditionObject(TestMode.ESM, t, conditionValue.import);
     });
 
-    await t.test('`require` field is condition', async (t) => {
-        await testBasicConditionObject(TestMode.CJS, t, conditionValue.require);
-    });
-
     await t.test('contains expected fields', (_t) => {
         const keys = Object.keys(conditionValue);
-        assert.deepStrictEqual(keys, ['import', 'require', 'default']);
+        assert.deepStrictEqual(keys, ['import', 'default']);
     });
 }
 
