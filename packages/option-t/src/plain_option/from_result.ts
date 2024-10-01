@@ -1,4 +1,4 @@
-import type { Result } from '../plain_result/result.js';
+import { isErr, isOk, type Result } from '../plain_result/result.js';
 import { type Option, createNone, createSome } from './option.js';
 
 /**
@@ -6,7 +6,7 @@ import { type Option, createNone, createSome } from './option.js';
  *  Otherwise, return `None`.
  */
 export function fromOkToOption<T, E>(input: Result<T, E>): Option<T> {
-    if (input.ok) {
+    if (isOk(input)) {
         return createSome<T>(input.val);
     }
 
@@ -18,8 +18,8 @@ export function fromOkToOption<T, E>(input: Result<T, E>): Option<T> {
  *  Otherwise, return `None`.
  */
 export function fromErrToOption<T, E>(input: Result<T, E>): Option<E> {
-    if (!input.ok) {
-        return createSome<E>(input.err);
+    if (isErr(input)) {
+        return createSome<E>(input.val);
     }
 
     return createNone();

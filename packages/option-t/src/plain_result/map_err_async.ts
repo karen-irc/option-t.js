@@ -15,7 +15,7 @@ export async function mapErrAsyncForResult<T, E, F>(
         return input;
     }
 
-    const e: F = await transformer(input.err);
+    const e: F = await transformer(input.val);
     const result: Result<T, F> = createErr(e);
     return result;
 }

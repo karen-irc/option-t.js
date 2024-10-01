@@ -1,5 +1,5 @@
 import type { TransformFn, RecoveryFromErrorFn } from '../internal/function.js';
-import type { Result } from './result.js';
+import { isOk, type Result } from './result.js';
 
 /**
  *  Maps a `Result<T, E>` to `U` by applying _transformer_ to a contained `Ok(T)` value in _input_,
@@ -11,11 +11,11 @@ export function mapOrElseForResult<T, E, U>(
     recoverer: RecoveryFromErrorFn<E, U>,
     transformer: TransformFn<T, U>,
 ): U {
-    if (input.ok) {
+    if (isOk(input)) {
         const result: U = transformer(input.val);
         return result;
     }
 
-    const fallback: U = recoverer(input.err);
+    const fallback: U = recoverer(input.val);
     return fallback;
 }

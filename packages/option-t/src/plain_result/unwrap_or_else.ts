@@ -1,5 +1,5 @@
 import type { RecoveryFromErrorFn } from '../internal/function.js';
-import type { Result } from './result.js';
+import { isOk, type Result } from './result.js';
 
 /**
  *  Unwraps a result _input_, returns the content of an `Ok(T)`.
@@ -9,11 +9,11 @@ export function unwrapOrElseForResult<T, E>(
     input: Result<T, E>,
     recoverer: RecoveryFromErrorFn<E, T>,
 ): T {
-    if (input.ok) {
+    if (isOk(input)) {
         const val: T = input.val;
         return val;
     }
 
-    const fallback: T = recoverer(input.err);
+    const fallback: T = recoverer(input.val);
     return fallback;
 }

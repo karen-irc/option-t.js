@@ -26,6 +26,9 @@ import {
  */
 export type Result<T, E> = Ok<T> | Err<E>;
 
+const TAG_OK = 'ok' as const;
+const TAG_ERR = 'err' as const;
+
 /**
  *  This type contain a success value _T_.
  *
@@ -49,7 +52,7 @@ export interface Ok<out T> {
      *  Then there was no well optimized `Symbol` to achieve a private property.
      *  We don't have a plan to change this into private property keep the backward compatibility.
      */
-    readonly ok: true;
+    readonly tag: typeof TAG_OK;
     /**
      *  Don't touch this property directly from an user project
      *  except 3rd party project that does not install this package but uses a value returned from an other project.
@@ -87,29 +90,17 @@ export interface Ok<out T> {
     //
     // By these reasons, we should not recommend to create this object without this factory function.
     // User can create this object by hand. But it's fragile for the future change. So We should not recommend it.
-    /**
-     *  Don't touch this property directly from an user project.
-     *  Instead, use {@link unwrapErr()} operator to get an inner value.
-     *
-     *  Historically, this type was created to target a JSVM that supports ES5.
-     *  Then there was no well optimized `Symbol` to achieve a private property.
-     *  We don't have a plan to change this into private property keep the backward compatibility.
-     */
-    readonly err: null;
 }
 
 export function isOk<T, E>(input: Result<T, E>): input is Ok<T> {
-    return input.ok;
+    const ok = input.tag === TAG_OK;
+    return ok;
 }
 
 export function createOk<T>(val: T): Ok<T> {
     const r: Ok<T> = {
-        ok: true,
+        tag: TAG_OK,
         val,
-        // XXX:
-        //  We need to fill with `null` to improve the compatibility with Next.js
-        //  see https://github.com/option-t/option-t/pull/1256
-        err: null,
     };
     return r;
 }
@@ -136,7 +127,7 @@ export interface Err<out E> {
      *  Then there was no well optimized `Symbol` to achieve a private property.
      *  We don't have a plan to change this into private property keep the backward compatibility.
      */
-    readonly ok: false;
+    readonly tag: typeof TAG_ERR;
 
     // To keep the same shape (hidden class or structure) with the other.
     // we should initialize this property.
@@ -173,32 +164,21 @@ export interface Err<out E> {
      *  Then there was no well optimized `Symbol` to achieve a private property.
      *  We don't have a plan to change this into private property keep the backward compatibility.
      */
-    readonly val: null;
-
-    /**
-     *  Don't touch this property directly from an user project
-     *  except 3rd party project that does not install this package but uses a value returned from an other project.
-     *  Instead, use {@link unwrapErr()} operator to get an inner value.
-     *
-     *  Historically, this type was created to target a JSVM that supports ES5.
-     *  Then there was no well optimized `Symbol` to achieve a private property.
-     *  We don't have a plan to change this into private property keep the backward compatibility.
-     */
-    readonly err: E;
+    readonly val: E;
 }
 
 export function isErr<T, E>(input: Result<T, E>): input is Err<E> {
-    return !input.ok;
+    const ok = input.tag === TAG_ERR;
+    return ok;
 }
 
 export function createErr<E>(err: E): Err<E> {
     const r: Err<E> = {
-        ok: false,
+        tag: TAG_ERR,
         // XXX:
         //  We need to fill with `null` to improve the compatibility with Next.js
         //  see https://github.com/option-t/option-t/pull/1256
-        val: null,
-        err,
+        val: err,
     };
     return r;
 }
@@ -231,7 +211,7 @@ export function unwrapErr<E>(input: Result<unknown, E>): E {
  *      Throws if the self is a `Err`.
  */
 export function expectOk<T, E>(input: Result<T, E>, msg: string): T {
-    if (!input.ok) {
+    if (isErr(input)) {
         throw new TypeError(msg);
     }
 
@@ -246,9 +226,9 @@ export function expectOk<T, E>(input: Result<T, E>, msg: string): T {
  *      Throws if the self is a `Ok`.
  */
 export function expectErr<T, E>(input: Result<T, E>, msg: string): E {
-    if (input.ok) {
+    if (isOk(input)) {
         throw new TypeError(msg);
     }
 
-    return input.err;
+    return input.val;
 }

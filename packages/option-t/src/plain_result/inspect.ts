@@ -29,7 +29,7 @@ export function inspectErrForResult<T, E>(
     effector: EffectFn<E>,
 ): Result<T, E> {
     if (isErr(input)) {
-        effector(input.err);
+        effector(input.val);
     }
     return input;
 }
@@ -48,10 +48,10 @@ export function inspectBothForResult<T, E>(
     okEffector: EffectFn<T>,
     errEffector: EffectFn<E>,
 ): Result<T, E> {
-    if (input.ok) {
+    if (isOk(input)) {
         okEffector(input.val);
     } else {
-        errEffector(input.err);
+        errEffector(input.val);
     }
     return input;
 }

@@ -1,5 +1,5 @@
 import type { TransformFn } from '../internal/function.js';
-import type { Result } from './result.js';
+import { isOk, type Result } from './result.js';
 
 /**
  *  Return the result of _transformer_ with using _input_ as an argument for it if _input_ is `Ok(T)`.
@@ -12,7 +12,7 @@ export function mapOrForResult<T, E, U>(
     defaultValue: U,
     transformer: TransformFn<T, U>,
 ): U {
-    if (input.ok) {
+    if (isOk(input)) {
         const result: U = transformer(input.val);
         return result;
     }

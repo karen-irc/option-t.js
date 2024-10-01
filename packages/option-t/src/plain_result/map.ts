@@ -1,5 +1,5 @@
 import type { TransformFn } from '../internal/function.js';
-import { type Result, createOk } from './result.js';
+import { type Result, createOk, isErr } from './result.js';
 
 /**
  *  Maps a `Result<T, E>` to `Result<U, E>` by applying a _transformer_ function
@@ -11,7 +11,7 @@ export function mapForResult<T, U, E>(
     input: Result<T, E>,
     transformer: TransformFn<T, U>,
 ): Result<U, E> {
-    if (!input.ok) {
+    if (isErr(input)) {
         return input;
     }
 

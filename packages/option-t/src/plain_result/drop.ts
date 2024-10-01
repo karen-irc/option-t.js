@@ -41,13 +41,14 @@ export function unsafeDropBothForResult<T, E>(
     okMutator: UnsafeOkDestructorFn<T>,
     errMutator: UnsafeErrDestructorFn<E>,
 ): void {
-    const mutable = asMutResult(input);
+    const mutable: MutResult<T, E> = asMutResult<T, E>(input);
+    // @ts-expect-error
     if (isOk(mutable)) {
         okMutator(mutable);
         mutable.val = undefined as never;
     } else {
         errMutator(mutable);
-        mutable.err = undefined as never;
+        mutable.val = undefined as never;
     }
 
     // By this freezing, if this function is called to the _input_ again,
