@@ -209,8 +209,10 @@ export function createErr<E>(err: E): Err<E> {
  *  @throws {TypeError}
  *      Throws if the self is a `Err`.
  */
+export function unwrapOk<T>(input: Ok<T>): T;
+export function unwrapOk(input: Err<unknown>): never;
 export function unwrapOk<T>(input: Result<T, unknown>): T {
-    return expectOk(input, ERR_MSG_UNWRAP_OK_BUT_INPUT_IS_ERR);
+    return expectOkInternal(input, ERR_MSG_UNWRAP_OK_BUT_INPUT_IS_ERR);
 }
 
 /**
@@ -219,8 +221,10 @@ export function unwrapOk<T>(input: Result<T, unknown>): T {
  *  @throws {TypeError}
  *      Throws if the self is a `Ok`.
  */
+export function unwrapErr(input: Ok<unknown>): never;
+export function unwrapErr<E>(input: Err<E>): E;
 export function unwrapErr<E>(input: Result<unknown, E>): E {
-    return expectErr(input, ERR_MSG_UNWRAP_ERR_BUT_INPUT_IS_OK);
+    return expectErrInternal(input, ERR_MSG_UNWRAP_ERR_BUT_INPUT_IS_OK);
 }
 
 /**
@@ -230,14 +234,10 @@ export function unwrapErr<E>(input: Result<unknown, E>): E {
  *  @throws {TypeError}
  *      Throws if the self is a `Err`.
  */
+export function expectOk<T>(input: Ok<T>, msg: string): T;
+export function expectOk(input: Err<unknown>, msg: string): never;
 export function expectOk<T>(input: Result<T, unknown>, msg: string): T {
-    if (isErr(input)) {
-        throw new TypeError(msg);
-    }
-
-    // We access the property directly to make this operator is a primitive basic operator.
-    const val: T = input.val;
-    return val;
+    return expectOkInternal(input, msg);
 }
 
 /**
@@ -247,7 +247,23 @@ export function expectOk<T>(input: Result<T, unknown>, msg: string): T {
  *  @throws {TypeError}
  *      Throws if the self is a `Ok`.
  */
+export function expectErr(input: Ok<unknown>, msg: string): never;
+export function expectErr<E>(input: Err<E>, msg: string): E;
 export function expectErr<E>(input: Result<unknown, E>, msg: string): E {
+    return expectErrInternal(input, msg);
+}
+
+function expectOkInternal<T>(input: Result<T, unknown>, msg: string): T {
+    if (isErr(input)) {
+        throw new TypeError(msg);
+    }
+
+    // We access the property directly to make this operator is a primitive basic operator.
+    const val: T = input.val;
+    return val;
+}
+
+function expectErrInternal<E>(input: Result<unknown, E>, msg: string): E {
     if (isOk(input)) {
         throw new TypeError(msg);
     }
